@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Quiz Tajwid - Évaluation</title>
+    <style>
+        body { font-family: sans-serif; background: #f4f4f4; padding: 20px; line-height: 1.6; }
+        .container { max-width: 700px; background: white; padding: 30px; margin: auto; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h1 { color: #2c3e50; text-align: center; }
+        .question { margin-bottom: 20px; padding: 15px; border-bottom: 1px solid #eee; }
+        .options label { display: block; margin: 10px 0; cursor: pointer; }
+        button { background: #27ae60; color: white; border: none; padding: 12px 20px; border-radius: 5px; cursor: pointer; width: 100%; font-size: 16px; }
+        button:hover { background: #219150; }
+        #resultat { margin-top: 20px; padding: 20px; display: none; text-align: center; font-weight: bold; font-size: 20px; border-radius: 5px; }
+        .user-info { margin-bottom: 20px; display: flex; gap: 10px; }
+        input[type="text"] { padding: 10px; flex: 1; border: 1px solid #ddd; border-radius: 4px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Quiz sur les règles du Tajwid</h1>
+    
+    <div class="user-info">
+        <input type="text" id="prenom" placeholder="Prénom" required>
+        <input type="text" id="nom" placeholder="Nom" required>
+    </div>
+
+    <form id="quizForm">
+        <div id="questions-container"></div>
+        <button type="button" onclick="calculerScore()">Envoyer mes réponses</button>
+    </form>
+
+    <div id="resultat"></div>
+</div>
+
+<script>
+const questions = [
+    { q: "Définition du Tajwid ?", a: "L'embellissement", b: "La mémorisation", c: "La traduction", correct: "a" },
+    { q: "Nombre de règles du Noun Sakina ?", a: "2", b: "4", c: "6", correct: "b" },
+    { q: "Règle pour Noun Sakina + lettre 'Ba' ?", a: "Izhar", b: "Iqlab", c: "Idgham", correct: "b" },
+    { q: "Qu'est-ce que la Ghunna ?", a: "Un arrêt", b: "Un son nasal", c: "Une vibration", correct: "b" },
+    { q: "Lettres de la Qalqala ?", a: "Qoutb Jadin", b: "Alif Wow Ya", c: "Lettres de la gorge", correct: "a" },
+    { q: "Cas de l'Izhar ?", a: "Lettre de la gorge", b: "Fin de verset", c: "Alif de prolongation", correct: "a" },
+    { q: "Durée du Mad Tabi'i ?", a: "1 temps", b: "2 temps", c: "4 temps", correct: "b" },
+    { q: "Types d'Idgham ?", a: "Petit/Grand", b: "Avec/Sans Ghunna", c: "Fort/Faible", correct: "b" },
+    { q: "Makhraj de la lettre Qaf ?", a: "Bout langue", b: "Fond langue", c: "Milieu langue", correct: "b" },
+    { q: "Nombre de règles du Meem Sakina ?", a: "3", b: "4", c: "2", correct: "a" }
+];
+
+function genererQuiz() {
+    const container = document.getElementById('questions-container');
+    questions.forEach((item, index) => {
+        container.innerHTML += `
+            <div class="question">
+                <p><strong>${index + 1}. ${item.q}</strong></p>
+                <div class="options">
+                    <label><input type="radio" name="q${index}" value="a"> A) ${item.a}</label>
+                    <label><input type="radio" name="q${index}" value="b"> B) ${item.b}</label>
+                    <label><input type="radio" name="q${index}" value="c"> C) ${item.c}</label>
+                </div>
+            </div>`;
+    });
+}
+
+function calculerScore() {
+    let score = 0;
+    const prenom = document.getElementById('prenom').value;
+    const nom = document.getElementById('nom').value;
+
+    if(!prenom || !nom) { alert("Merci de remplir votre nom et prénom"); return; }
+
+    questions.forEach((item, index) => {
+        const reponse = document.querySelector(`input[name="q${index}"]:checked`);
+        if (reponse && reponse.value === item.correct) {
+            score++;
+        }
+    });
+
+    const resDiv = document.getElementById('resultat');
+    resDiv.style.display = "block";
+    resDiv.style.background = score >= 5 ? "#d4edda" : "#f8d7da";
+    resDiv.innerHTML = `${prenom} ${nom}, votre note est : ${score} / ${questions.length}`;
+    window.scrollTo(0, document.body.scrollHeight);
+}
+
+genererQuiz();
+</script>
+
+</body>
+</html>
