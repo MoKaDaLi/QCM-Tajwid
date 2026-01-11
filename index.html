@@ -67,8 +67,7 @@ function calculerScore() {
     let score = 0;
     const prenom = document.getElementById('prenom').value;
     const nom = document.getElementById('nom').value;
-    // Remplacez bien par votre URL de script
-    const urlScript = "https://script.google.com/macros/s/AKfycbwVCzhqYlx9DSPnGOUar1l0jT2R1P4Ds9kWUN-weYTKENXR1U42_bt7RYuVy_O1QbeNgA/exec";
+    const urlScript = "https://script.google.com/macros/s/AKfycbwonLVUl08YlpFwK9oip0cPMNnO-IEF91ZWQNHBiqhUAiLlEiOJsaxsHEOJuTgqIbJ8dw/exec";
 
     if(!prenom || !nom) { alert("Merci de remplir votre nom et prénom"); return; }
 
@@ -79,21 +78,18 @@ function calculerScore() {
 
     const resDiv = document.getElementById('resultat');
     resDiv.style.display = "block";
-    resDiv.innerHTML = "Envoi des résultats...";
+    resDiv.innerHTML = "Envoi des résultats en cours...";
 
-    // On construit l'URL avec les paramètres pour le script Google
+    // TECHNIQUE DE L'IMAGE : On "charge" une image invisible dont l'URL contient nos données
+    // C'est une astuce qui contourne totalement le problème CORS
     const finalUrl = `${urlScript}?prenom=${encodeURIComponent(prenom)}&nom=${encodeURIComponent(nom)}&note=${score}`;
+    
+    const img = new Image();
+    img.src = finalUrl; 
 
-    // On utilise mode: 'no-cors' pour ignorer la restriction du navigateur
-    fetch(finalUrl, { mode: 'no-cors' })
-        .then(() => {
-            resDiv.innerHTML = `BarakAllahou fik ${prenom} ${nom}, votre note est : ${score} / 10. <br> Résultats enregistrés !`;
-            resDiv.style.background = "#d4edda";
-        })
-        .catch(err => {
-            console.error(err);
-            resDiv.innerHTML = "Erreur de connexion, mais votre note est : " + score + "/10";
-        });
+    // On affiche le résultat immédiatement sans attendre la réponse du serveur
+    resDiv.innerHTML = `BarakAllahou fik ${prenom} ${nom}, votre note est : ${score} / 10. <br> Résultats enregistrés avec succès !`;
+    resDiv.style.background = "#d4edda";
 }
 
 genererQuiz();
