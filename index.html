@@ -67,37 +67,48 @@ function calculerScore() {
     let score = 0;
     const prenom = document.getElementById('prenom').value;
     const nom = document.getElementById('nom').value;
+    
+    // Remplace bien par ton URL de déploiement (se terminant par /exec)
     const urlScript = "https://script.google.com/macros/s/AKfycbwVCzhqYlx9DSPnGOUar1l0jT2R1P4Ds9kWUN-weYTKENXR1U42_bt7RYuVy_O1QbeNgA/exec";
 
-    if(!prenom || !nom) { 
-        alert("Merci de remplir votre nom et prénom"); 
+    // 1. Vérification que les champs sont remplis
+    if (!prenom || !nom) { 
+        alert("Merci de remplir votre nom et prénom avant d'envoyer."); 
         return; 
     }
 
-    // Calcul du score
+    // 2. Calcul de la note (parcours des 10 questions)
     questions.forEach((item, index) => {
         const reponse = document.querySelector(`input[name="q${index}"]:checked`);
-        if (reponse && reponse.value === item.correct) { score++; }
+        // Si l'élève n'a pas répondu, 'reponse' est null, donc pas de point (compté comme faux)
+        if (reponse && reponse.value === item.correct) { 
+            score++; 
+        }
     });
 
-    // Affichage du résultat sur la page
+    // 3. Affichage immédiat du résultat pour l'élève
     const resDiv = document.getElementById('resultat');
     resDiv.style.display = "block";
     resDiv.style.background = "#d4edda";
-    resDiv.innerHTML = `BarakAllahou fik ${prenom} ${nom}, votre note est : ${score} / 10. <br> Envoi en cours...`;
+    resDiv.innerHTML = `BarakAllahou fik ${prenom} ${nom}, votre note est : ${score} / 10. <br> Envoi des résultats...`;
 
-    // METHODE INFAILLIBLE : Envoi via une balise <script> (JSONP)
-    // Cela contourne TOUTES les restrictions de sécurité (CORS/Iframe)
-    const finalUrl = `${urlScript}?prenom=${encodeURIComponent(prenom)}&nom=${encodeURIComponent(nom)}&note=${score}&callback=callback`;
-    
-    const script = document.createElement('script');
-    script.src = finalUrl;
-    document.body.appendChild(script);
+    // 4. Construction de l'URL avec les paramètres
+    const finalUrl = `${urlScript}?prenom=${encodeURIComponent(prenom)}&nom=${encodeURIComponent(nom)}&note=${score}`;
 
-    // Message final après un court délai
-    setTimeout(() => {
-        resDiv.innerHTML = `BarakAllahou fik ${prenom} ${nom}, votre note est : ${score} / 10. <br> ✅ Résultats enregistrés !`;
-    }, 1500);
+    // 5. Envoi discret vers Google Sheets (Fetch No-CORS)
+    fetch(finalUrl, {
+        mode: 'no-cors' // Indispensable pour éviter l'erreur de sécurité bloquante
+    })
+    .then(() => {
+        // Succès de l'envoi
+        resDiv.innerHTML = `BarakAllahou fik ${prenom} ${nom}, votre note est : ${score} / 10. <br> ✅ Résultats enregistrés avec succès !`;
+    })
+    .catch(err => {
+        // En cas d'erreur de connexion réseau
+        console.error("Erreur d'envoi :", err);
+        resDiv.innerHTML = `Votre note : ${score}/10. <br> (Note non enregistrée, vérifiez votre connexion)`;
+        resDiv.style.background = "#f8d7da";
+    });
 }
 
 // Fonction vide nécessaire pour la méthode du script
