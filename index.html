@@ -93,7 +93,7 @@
  *
  * Le champ "correctIndex" correspond à l’index (0..2) dans le tableau "choices".
  */
-
+const RESULTS_ENDPOINT = "https://script.google.com/macros/s/AKfycbz_5MeT7k7JAwZWmgjBFtJb9Kf3YdFksDofmojY90rodTnMe4Sm0iWpej7MVGGQki0aHg/exec";
 const BASE_QUESTIONS = [
   {
     id: "q1",
@@ -362,7 +362,7 @@ function decisionBadge(score) {
   return { cls: "no", label: "❌ Non acquis" };
 }
 
-function submitExam() {
+async function submitExam() {
   // Vérifie que tout est répondu
   const unanswered = currentQuestions.filter(q => answers[q.id] === undefined);
   if (unanswered.length) {
@@ -384,6 +384,28 @@ function submitExam() {
     details
   };
   saveHistory(entry);
+
+    // Envoi vers Google Sheets (collecte centralisée)
+  try {
+    await fetch(RESULTS_ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify({
+        nom: entry.nom,
+        prenom: entry.prenom,
+        serie: entry.serie,
+        score: entry.score,
+        total: entry.total,
+        details: entry.details,
+        userAgent: navigator.userAgent,
+        pageUrl: location.href
+      })
+    });
+  } catch (e) {
+    // Ne bloque pas l’utilisateur si la collecte échoue
+    console.warn("Collecte échouée:", e);
+  }
+
 
   elResult.innerHTML = `
     <div class="result">
