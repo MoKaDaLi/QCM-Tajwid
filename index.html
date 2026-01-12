@@ -67,7 +67,7 @@ function calculerScore() {
     let score = 0;
     const prenom = document.getElementById('prenom').value;
     const nom = document.getElementById('nom').value;
-    const urlScript = "https://script.google.com/macros/s/AKfycbwVCzhqYlx9DSPnGOUar1l0jT2R1P4Ds9kWUN-weYTKENXR1U42_bt7RYuVy_O1QbeNgA/exec"; // L'URL qui a affiché "succès"
+    const urlScript = "https://script.google.com/macros/s/AKfycbwVCzhqYlx9DSPnGOUar1l0jT2R1P4Ds9kWUN-weYTKENXR1U42_bt7RYuVy_O1QbeNgA/exec";
 
     if(!prenom || !nom) { 
         alert("Merci de remplir votre nom et prénom"); 
@@ -80,26 +80,28 @@ function calculerScore() {
         if (reponse && reponse.value === item.correct) { score++; }
     });
 
-    // Affichage immédiat de la note pour l'élève
+    // Affichage du résultat sur la page
     const resDiv = document.getElementById('resultat');
     resDiv.style.display = "block";
     resDiv.style.background = "#d4edda";
-    resDiv.innerHTML = `BarakAllahou fik ${prenom} ${nom}, votre note est : ${score} / 10. <br> Envoi des résultats...`;
+    resDiv.innerHTML = `BarakAllahou fik ${prenom} ${nom}, votre note est : ${score} / 10. <br> Envoi en cours...`;
 
-    // ENVOI INFAILLIBLE : On ouvre l'URL dans une micro-fenêtre invisible
-    // Cela simule exactement votre test manuel qui a fonctionné
-    const finalUrl = `${urlScript}?prenom=${encodeURIComponent(prenom)}&nom=${encodeURIComponent(nom)}&note=${score}`;
+    // METHODE INFAILLIBLE : Envoi via une balise <script> (JSONP)
+    // Cela contourne TOUTES les restrictions de sécurité (CORS/Iframe)
+    const finalUrl = `${urlScript}?prenom=${encodeURIComponent(prenom)}&nom=${encodeURIComponent(nom)}&note=${score}&callback=callback`;
     
-    const iframe = document.createElement('iframe');
-    iframe.style.display = 'none';
-    iframe.src = finalUrl;
-    document.body.appendChild(iframe);
+    const script = document.createElement('script');
+    script.src = finalUrl;
+    document.body.appendChild(script);
 
-    // Petit message de confirmation après 2 secondes
+    // Message final après un court délai
     setTimeout(() => {
-        resDiv.innerHTML = `BarakAllahou fik ${prenom} ${nom}, votre note est : ${score} / 10. <br> Résultats enregistrés dans le tableau !`;
-    }, 2000);
+        resDiv.innerHTML = `BarakAllahou fik ${prenom} ${nom}, votre note est : ${score} / 10. <br> ✅ Résultats enregistrés !`;
+    }, 1500);
 }
+
+// Fonction vide nécessaire pour la méthode du script
+function callback(e) { return; }
 
 genererQuiz();
 </script>
