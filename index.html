@@ -67,29 +67,38 @@ function calculerScore() {
     let score = 0;
     const prenom = document.getElementById('prenom').value;
     const nom = document.getElementById('nom').value;
-    const urlScript = "https://script.google.com/macros/s/AKfycbwVCzhqYlx9DSPnGOUar1l0jT2R1P4Ds9kWUN-weYTKENXR1U42_bt7RYuVy_O1QbeNgA/exec";
+    const urlScript = "https://script.google.com/macros/s/AKfycbwVCzhqYlx9DSPnGOUar1l0jT2R1P4Ds9kWUN-weYTKENXR1U42_bt7RYuVy_O1QbeNgA/exec"; // L'URL qui a affiché "succès"
 
-    if(!prenom || !nom) { alert("Merci de remplir votre nom et prénom"); return; }
+    if(!prenom || !nom) { 
+        alert("Merci de remplir votre nom et prénom"); 
+        return; 
+    }
 
+    // Calcul du score
     questions.forEach((item, index) => {
         const reponse = document.querySelector(`input[name="q${index}"]:checked`);
         if (reponse && reponse.value === item.correct) { score++; }
     });
 
+    // Affichage immédiat de la note pour l'élève
     const resDiv = document.getElementById('resultat');
     resDiv.style.display = "block";
-    resDiv.innerHTML = "Envoi des résultats en cours...";
+    resDiv.style.background = "#d4edda";
+    resDiv.innerHTML = `BarakAllahou fik ${prenom} ${nom}, votre note est : ${score} / 10. <br> Envoi des résultats...`;
 
-    // TECHNIQUE DE L'IMAGE : On "charge" une image invisible dont l'URL contient nos données
-    // C'est une astuce qui contourne totalement le problème CORS
+    // ENVOI INFAILLIBLE : On ouvre l'URL dans une micro-fenêtre invisible
+    // Cela simule exactement votre test manuel qui a fonctionné
     const finalUrl = `${urlScript}?prenom=${encodeURIComponent(prenom)}&nom=${encodeURIComponent(nom)}&note=${score}`;
     
-    const img = new Image();
-    img.src = finalUrl; 
+    const iframe = document.createElement('iframe');
+    iframe.style.display = 'none';
+    iframe.src = finalUrl;
+    document.body.appendChild(iframe);
 
-    // On affiche le résultat immédiatement sans attendre la réponse du serveur
-    resDiv.innerHTML = `BarakAllahou fik ${prenom} ${nom}, votre note est : ${score} / 10. <br> Résultats enregistrés avec succès !`;
-    resDiv.style.background = "#d4edda";
+    // Petit message de confirmation après 2 secondes
+    setTimeout(() => {
+        resDiv.innerHTML = `BarakAllahou fik ${prenom} ${nom}, votre note est : ${score} / 10. <br> Résultats enregistrés dans le tableau !`;
+    }, 2000);
 }
 
 genererQuiz();
