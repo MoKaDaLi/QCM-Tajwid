@@ -1,121 +1,499 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <title>Quiz Tajwid - Évaluation</title>
-    <style>
-        body { font-family: sans-serif; background: #f4f4f4; padding: 20px; line-height: 1.6; }
-        .container { max-width: 700px; background: white; padding: 30px; margin: auto; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        h1 { color: #2c3e50; text-align: center; }
-        .question { margin-bottom: 20px; padding: 15px; border-bottom: 1px solid #eee; }
-        .options label { display: block; margin: 10px 0; cursor: pointer; }
-        button { background: #27ae60; color: white; border: none; padding: 12px 20px; border-radius: 5px; cursor: pointer; width: 100%; font-size: 16px; }
-        button:hover { background: #219150; }
-        #resultat { margin-top: 20px; padding: 20px; display: none; text-align: center; font-weight: bold; font-size: 20px; border-radius: 5px; }
-        .user-info { margin-bottom: 20px; display: flex; gap: 10px; }
-        input[type="text"] { padding: 10px; flex: 1; border: 1px solid #ddd; border-radius: 4px; }
-    </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Examen Tejouïde (Tajwīd) – QCM</title>
+  <style>
+    :root { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
+    body { margin: 0; background:#f6f7f9; color:#111; }
+    .wrap { max-width: 920px; margin: 0 auto; padding: 20px; }
+    .card { background:#fff; border:1px solid #e7e9ee; border-radius:16px; padding:18px; box-shadow: 0 4px 18px rgba(0,0,0,.04); }
+    h1 { font-size: 22px; margin: 0 0 6px; }
+    p { margin: 8px 0; line-height: 1.45; }
+    .grid { display:grid; grid-template-columns: 1fr 1fr 1fr; gap:12px; }
+    .grid-2 { display:grid; grid-template-columns: 1fr 1fr; gap:12px; }
+    label { display:block; font-size: 12px; color:#444; margin: 10px 0 6px; }
+    input, select { width:100%; padding:10px 12px; border-radius:10px; border:1px solid #d8dbe3; background:#fff; font-size:14px; }
+    .btnrow { display:flex; gap:10px; flex-wrap: wrap; margin-top: 12px; }
+    button { border:0; border-radius:12px; padding:10px 14px; font-weight:600; cursor:pointer; }
+    .primary { background:#111; color:#fff; }
+    .ghost { background:#eef1f6; color:#111; }
+    .danger { background:#ffebee; color:#b71c1c; }
+    .q { margin-top: 14px; padding-top: 14px; border-top:1px solid #eef1f6; }
+    .q h3 { margin: 0 0 10px; font-size: 16px; }
+    .choices { display:grid; gap:8px; }
+    .choice { display:flex; gap:10px; align-items:flex-start; padding:10px 12px; border:1px solid #e7e9ee; border-radius:12px; background:#fff; }
+    .choice input { width:auto; margin-top:2px; }
+    .meta { font-size: 12px; color:#666; }
+    .result { margin-top: 16px; padding:14px; border-radius:14px; border:1px solid #e7e9ee; background:#fafbff; }
+    .badge { display:inline-block; padding:4px 10px; border-radius:999px; font-size: 12px; font-weight:700; }
+    .ok { background:#e8f5e9; color:#1b5e20; }
+    .mid { background:#fff8e1; color:#8d6e00; }
+    .no { background:#ffebee; color:#b71c1c; }
+    .muted { color:#666; font-size: 13px; }
+    .history { margin-top: 14px; }
+    table { width:100%; border-collapse: collapse; font-size: 13px; }
+    th, td { text-align:left; padding:10px; border-bottom:1px solid #eef1f6; }
+    th { color:#555; font-size:12px; }
+    code.kbd { background:#eef1f6; padding:2px 6px; border-radius:8px; }
+  </style>
 </head>
 <body>
+  <div class="wrap">
+    <div class="card">
+      <h1>Examen de Tejouïde (Tajwīd) – QCM</h1>
+      <p class="muted">
+        10 questions · 1 seule réponse correcte · Notation automatique (/10) · Séries A/B/C
+      </p>
 
-<div class="container">
-    <h1>Quiz sur les règles du Tajwid</h1>
-    
-    <div class="user-info">
-        <input type="text" id="prenom" placeholder="Prénom" required>
-        <input type="text" id="nom" placeholder="Nom" required>
+      <div class="grid">
+        <div>
+          <label for="nom">Nom *</label>
+          <input id="nom" autocomplete="family-name" placeholder="Ex. Dupont" />
+        </div>
+        <div>
+          <label for="prenom">Prénom *</label>
+          <input id="prenom" autocomplete="given-name" placeholder="Ex. Ahmed" />
+        </div>
+        <div>
+          <label for="serie">Série *</label>
+          <select id="serie">
+            <option value="A">Série A</option>
+            <option value="B">Série B</option>
+            <option value="C">Série C</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="btnrow">
+        <button class="primary" id="btnStart">Démarrer l’examen</button>
+        <button class="ghost" id="btnReset" title="Efface les réponses en cours">Réinitialiser</button>
+        <button class="ghost" id="btnHistory">Afficher l’historique</button>
+        <button class="ghost" id="btnExport">Exporter CSV</button>
+        <button class="danger" id="btnClearHistory" title="Supprime l’historique local">Effacer historique</button>
+      </div>
+
+      <div id="exam"></div>
+      <div id="result"></div>
+      <div id="history" class="history"></div>
+
+      <p class="meta">
+        Astuce déploiement : mets ce fichier en <code class="kbd">index.html</code> sur GitHub Pages / Netlify / serveur interne.
+      </p>
     </div>
-
-    <form id="quizForm">
-        <div id="questions-container"></div>
-        <button type="button" onclick="calculerScore()">Envoyer mes réponses</button>
-    </form>
-
-    <div id="resultat"></div>
-</div>
+  </div>
 
 <script>
-const questions = [
-    { q: "Définition du Tajwid ?", a: "L'embellissement", b: "La mémorisation", c: "La traduction", correct: "a" },
-    { q: "Nombre de règles du Noun Sakina ?", a: "2", b: "4", c: "6", correct: "b" },
-    { q: "Règle pour Noun Sakina + lettre 'Ba' ?", a: "Izhar", b: "Iqlab", c: "Idgham", correct: "b" },
-    { q: "Qu'est-ce que la Ghunna ?", a: "Un arrêt", b: "Un son nasal", c: "Une vibration", correct: "b" },
-    { q: "Lettres de la Qalqala ?", a: "Qoutb Jadin", b: "Alif Wow Ya", c: "Lettres de la gorge", correct: "a" },
-    { q: "Cas de l'Izhar ?", a: "Lettre de la gorge", b: "Fin de verset", c: "Alif de prolongation", correct: "a" },
-    { q: "Durée du Mad Tabi'i ?", a: "1 temps", b: "2 temps", c: "4 temps", correct: "b" },
-    { q: "Types d'Idgham ?", a: "Petit/Grand", b: "Avec/Sans Ghunna", c: "Fort/Faible", correct: "b" },
-    { q: "Makhraj de la lettre Qaf ?", a: "Bout langue", b: "Fond langue", c: "Milieu langue", correct: "b" },
-    { q: "Nombre de règles du Meem Sakina ?", a: "3", b: "4", c: "2", correct: "a" }
+/**
+ * Données QCM
+ * - Série A : ordre standard
+ * - Série B : même ordre mais réponses permutées
+ * - Série C : ordre des questions permuté + réponses permutées
+ *
+ * Le champ "correctIndex" correspond à l’index (0..2) dans le tableau "choices".
+ */
+
+const BASE_QUESTIONS = [
+  {
+    id: "q1",
+    text: "Qu’est-ce que le Tajwīd ?",
+    choicesA: [
+      "L’apprentissage de la langue arabe moderne",
+      "L’ensemble des règles permettant de réciter correctement le Coran",
+      "La mémorisation du Coran sans récitation"
+    ],
+    correctA: 1,
+  },
+  {
+    id: "q2",
+    text: "D’où sort principalement la lettre ق (qāf) ?",
+    choicesA: [
+      "Du bout de la langue",
+      "Du fond de la langue contre le palais mou",
+      "Des lèvres"
+    ],
+    correctA: 1,
+  },
+  {
+    id: "q3",
+    text: "Quelle est la caractéristique principale de la ghunnah ?",
+    choicesA: [
+      "Une vibration de la langue",
+      "Un son nasal provenant du nez",
+      "Un arrêt brusque du son"
+    ],
+    correctA: 1,
+  },
+  {
+    id: "q4",
+    text: "Que signifie nūn sākinah ?",
+    choicesA: [
+      "Un nūn avec une voyelle courte",
+      "Un nūn sans voyelle (avec sukūn ou tanwīn)",
+      "Un nūn doublé"
+    ],
+    correctA: 1,
+  },
+  {
+    id: "q5",
+    text: "Combien de règles principales s’appliquent au nūn sākinah et au tanwīn ?",
+    choicesA: ["2", "3", "4"],
+    correctA: 2,
+  },
+  {
+    id: "q6",
+    text: "Dans quel cas applique-t-on la règle de l’ikhfā’ ?",
+    choicesA: [
+      "Quand le nūn sākinah est suivi d’une lettre de la gorge",
+      "Quand le nūn sākinah est suivi d’une lettre spécifique parmi 15 lettres",
+      "Quand le nūn sākinah est suivi de م ou ن"
+    ],
+    correctA: 1,
+  },
+  {
+    id: "q7",
+    text: "Qu’est-ce que la qalqala ?",
+    choicesA: [
+      "Un allongement du son",
+      "Une vibration ou rebond du son sur certaines lettres",
+      "Une nasalisation prolongée"
+    ],
+    correctA: 1,
+  },
+  {
+    id: "q8",
+    text: "Quelles sont les lettres de la qalqala ?",
+    choicesA: [
+      "ا و ي",
+      "ق ط ب ج د",
+      "س ش ص"
+    ],
+    correctA: 1,
+  },
+  {
+    id: "q9",
+    text: "Qu’est-ce qu’un madd en tajwīd ?",
+    choicesA: [
+      "Une coupure du son",
+      "Une répétition d’une lettre",
+      "Un allongement de la voyelle"
+    ],
+    correctA: 2,
+  },
+  {
+    id: "q10",
+    text: "Quelle est la durée minimale du madd naturel (madd aṣlī) ?",
+    choicesA: ["1 temps", "2 temps", "4 temps"],
+    correctA: 1,
+  },
 ];
 
-function genererQuiz() {
-    const container = document.getElementById('questions-container');
-    questions.forEach((item, index) => {
-        container.innerHTML += `
-            <div class="question">
-                <p><strong>${index + 1}. ${item.q}</strong></p>
-                <div class="options">
-                    <label><input type="radio" name="q${index}" value="a"> A) ${item.a}</label>
-                    <label><input type="radio" name="q${index}" value="b"> B) ${item.b}</label>
-                    <label><input type="radio" name="q${index}" value="c"> C) ${item.c}</label>
-                </div>
-            </div>`;
-    });
+// Série B : permutation des réponses (et donc des indices corrects)
+const SERIES_B_PERMUTATIONS = {
+  // pour chaque question, un tableau qui donne le nouvel ordre des indices [0,1,2]
+  // ex: [1,2,0] => nouvelleChoice0 = ancienneChoice1, nouvelleChoice1 = ancienneChoice2, etc.
+  q1:  [1,2,0],
+  q2:  [1,0,2],
+  q3:  [2,1,0],
+  q4:  [1,2,0],
+  q5:  [2,0,1],
+  q6:  [1,0,2],
+  q7:  [1,2,0],
+  q8:  [0,2,1],
+  q9:  [2,0,1],
+  q10: [1,0,2],
+};
+
+// Série C : ordre des questions + permutations des réponses
+const SERIES_C_ORDER = ["q5","q2","q9","q1","q8","q3","q10","q6","q4","q7"];
+const SERIES_C_PERMUTATIONS = {
+  q1:  [2,0,1],
+  q2:  [0,2,1],
+  q3:  [1,0,2],
+  q4:  [2,1,0],
+  q5:  [1,2,0],
+  q6:  [2,0,1],
+  q7:  [0,1,2],
+  q8:  [1,0,2],
+  q9:  [1,2,0],
+  q10: [2,0,1],
+};
+
+function permute(arr, order) {
+  return order.map(i => arr[i]);
+}
+function newCorrectIndex(oldCorrectIndex, order) {
+  // order maps newIndex -> oldIndex ; we need find newIndex where oldIndex == oldCorrectIndex
+  return order.findIndex(oldIdx => oldIdx === oldCorrectIndex);
 }
 
-function calculerScore() {
-    let score = 0;
-    const prenom = document.getElementById('prenom').value;
-    const nom = document.getElementById('nom').value;
-    
-    // Remplace bien par ton URL de déploiement (se terminant par /exec)
-    const urlScript = "https://script.google.com/macros/s/AKfycbwVCzhqYlx9DSPnGOUar1l0jT2R1P4Ds9kWUN-weYTKENXR1U42_bt7RYuVy_O1QbeNgA/exec";
+function buildQuestionsForSeries(series) {
+  // Start from A
+  const base = BASE_QUESTIONS.map(q => ({
+    id: q.id,
+    text: q.text,
+    choices: [...q.choicesA],
+    correctIndex: q.correctA
+  }));
 
-    // 1. Vérification que les champs sont remplis
-    if (!prenom || !nom) { 
-        alert("Merci de remplir votre nom et prénom avant d'envoyer."); 
-        return; 
-    }
+  if (series === "A") return base;
 
-    // 2. Calcul de la note (parcours des 10 questions)
-    questions.forEach((item, index) => {
-        const reponse = document.querySelector(`input[name="q${index}"]:checked`);
-        // Si l'élève n'a pas répondu, 'reponse' est null, donc pas de point (compté comme faux)
-        if (reponse && reponse.value === item.correct) { 
-            score++; 
-        }
+  if (series === "B") {
+    return base.map(q => {
+      const order = SERIES_B_PERMUTATIONS[q.id] ?? [0,1,2];
+      const choices = permute(q.choices, order);
+      const correctIndex = newCorrectIndex(q.correctIndex, order);
+      return { ...q, choices, correctIndex };
     });
+  }
 
-    // 3. Affichage immédiat du résultat pour l'élève
-    const resDiv = document.getElementById('resultat');
-    resDiv.style.display = "block";
-    resDiv.style.background = "#d4edda";
-    resDiv.innerHTML = `BarakAllahou fik ${prenom} ${nom}, votre note est : ${score} / 10. <br> Envoi des résultats...`;
-
-    // 4. Construction de l'URL avec les paramètres
-    const finalUrl = `${urlScript}?prenom=${encodeURIComponent(prenom)}&nom=${encodeURIComponent(nom)}&note=${score}`;
-
-    // 5. Envoi discret vers Google Sheets (Fetch No-CORS)
-    fetch(finalUrl, {
-        mode: 'no-cors' // Indispensable pour éviter l'erreur de sécurité bloquante
-    })
-    .then(() => {
-        // Succès de l'envoi
-        resDiv.innerHTML = `BarakAllahou fik ${prenom} ${nom}, votre note est : ${score} / 10. <br> ✅ Résultats enregistrés avec succès !`;
-    })
-    .catch(err => {
-        // En cas d'erreur de connexion réseau
-        console.error("Erreur d'envoi :", err);
-        resDiv.innerHTML = `Votre note : ${score}/10. <br> (Note non enregistrée, vérifiez votre connexion)`;
-        resDiv.style.background = "#f8d7da";
+  if (series === "C") {
+    const byId = Object.fromEntries(base.map(q => [q.id, q]));
+    const reordered = SERIES_C_ORDER.map(id => byId[id]);
+    return reordered.map(q => {
+      const order = SERIES_C_PERMUTATIONS[q.id] ?? [0,1,2];
+      const choices = permute(q.choices, order);
+      const correctIndex = newCorrectIndex(q.correctIndex, order);
+      return { ...q, choices, correctIndex };
     });
+  }
+
+  return base;
 }
 
-// Fonction vide nécessaire pour la méthode du script
-function callback(e) { return; }
+// UI + logique
+const elNom = document.getElementById("nom");
+const elPrenom = document.getElementById("prenom");
+const elSerie = document.getElementById("serie");
+const elExam = document.getElementById("exam");
+const elResult = document.getElementById("result");
+const elHistory = document.getElementById("history");
 
-genererQuiz();
+let currentQuestions = [];
+let answers = {}; // { qid: index }
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+
+function renderExam() {
+  elResult.innerHTML = "";
+  elHistory.innerHTML = "";
+  if (!currentQuestions.length) {
+    elExam.innerHTML = "";
+    return;
+  }
+
+  const html = currentQuestions.map((q, idx) => {
+    const name = `ans_${q.id}`;
+    const choicesHtml = q.choices.map((c, i) => {
+      const checked = answers[q.id] === i ? "checked" : "";
+      return `
+        <label class="choice">
+          <input type="radio" name="${name}" value="${i}" ${checked} />
+          <span>${escapeHtml(c)}</span>
+        </label>
+      `;
+    }).join("");
+
+    return `
+      <div class="q">
+        <h3>${idx+1}. ${escapeHtml(q.text)}</h3>
+        <div class="choices">${choicesHtml}</div>
+      </div>
+    `;
+  }).join("");
+
+  elExam.innerHTML = `
+    <div style="margin-top:14px;">
+      <div class="btnrow">
+        <button class="primary" id="btnSubmit">Soumettre et obtenir la note</button>
+      </div>
+      ${html}
+    </div>
+  `;
+
+  // Bind change events
+  elExam.querySelectorAll('input[type="radio"]').forEach(r => {
+    r.addEventListener("change", (e) => {
+      const [_, qid] = e.target.name.split("ans_");
+      answers[qid] = Number(e.target.value);
+    });
+  });
+
+  document.getElementById("btnSubmit").addEventListener("click", submitExam);
+}
+
+function validateIdentity() {
+  const nom = elNom.value.trim();
+  const prenom = elPrenom.value.trim();
+  if (!nom || !prenom) {
+    alert("Merci de renseigner Nom et Prénom.");
+    return false;
+  }
+  return true;
+}
+
+function startExam() {
+  if (!validateIdentity()) return;
+
+  const serie = elSerie.value;
+  currentQuestions = buildQuestionsForSeries(serie);
+  answers = {};
+  renderExam();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function computeScore() {
+  let score = 0;
+  const details = currentQuestions.map(q => {
+    const given = answers[q.id];
+    const ok = (given === q.correctIndex);
+    if (ok) score += 1;
+    return { id: q.id, ok, given, correct: q.correctIndex };
+  });
+  return { score, details, total: currentQuestions.length };
+}
+
+function decisionBadge(score) {
+  if (score >= 8) return { cls: "ok", label: "✅ Réussi" };
+  if (score >= 6) return { cls: "mid", label: "⚠️ Niveau moyen" };
+  return { cls: "no", label: "❌ Non acquis" };
+}
+
+function submitExam() {
+  // Vérifie que tout est répondu
+  const unanswered = currentQuestions.filter(q => answers[q.id] === undefined);
+  if (unanswered.length) {
+    alert(`Il manque ${unanswered.length} réponse(s). Merci de répondre à toutes les questions.`);
+    return;
+  }
+
+  const { score, total, details } = computeScore();
+  const badge = decisionBadge(score);
+
+  // Sauvegarde historique local
+  const entry = {
+    ts: new Date().toISOString(),
+    nom: elNom.value.trim(),
+    prenom: elPrenom.value.trim(),
+    serie: elSerie.value,
+    score,
+    total,
+    details
+  };
+  saveHistory(entry);
+
+  elResult.innerHTML = `
+    <div class="result">
+      <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
+        <div>
+          <div class="badge ${badge.cls}">${badge.label}</div>
+          <p style="margin:8px 0 0;"><strong>Note :</strong> ${score} / ${total}</p>
+          <p class="muted" style="margin:6px 0 0;">
+            Seuils : ≥8 Réussi · 6–7 Moyen · ≤5 Non acquis
+          </p>
+        </div>
+        <div class="btnrow" style="margin:0;">
+          <button class="ghost" id="btnShowHistory2">Voir historique</button>
+        </div>
+      </div>
+    </div>
+  `;
+  document.getElementById("btnShowHistory2").addEventListener("click", renderHistory);
+
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function getHistory() {
+  try {
+    return JSON.parse(localStorage.getItem("tajwid_exam_history") || "[]");
+  } catch {
+    return [];
+  }
+}
+function saveHistory(entry) {
+  const h = getHistory();
+  h.unshift(entry);
+  localStorage.setItem("tajwid_exam_history", JSON.stringify(h.slice(0, 200))); // limite
+}
+
+function renderHistory() {
+  const h = getHistory();
+  if (!h.length) {
+    elHistory.innerHTML = `<p class="muted">Aucun historique local pour le moment.</p>`;
+    return;
+  }
+  const rows = h.map(e => {
+    const dt = new Date(e.ts);
+    const dateStr = dt.toLocaleString("fr-FR");
+    return `
+      <tr>
+        <td>${escapeHtml(dateStr)}</td>
+        <td>${escapeHtml(e.nom)}</td>
+        <td>${escapeHtml(e.prenom)}</td>
+        <td>${escapeHtml(e.serie)}</td>
+        <td><strong>${e.score}/${e.total}</strong></td>
+      </tr>
+    `;
+  }).join("");
+
+  elHistory.innerHTML = `
+    <div class="result">
+      <p style="margin:0 0 10px;"><strong>Historique (stocké localement sur cet appareil)</strong></p>
+      <table>
+        <thead>
+          <tr><th>Date</th><th>Nom</th><th>Prénom</th><th>Série</th><th>Score</th></tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+  `;
+  window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
+}
+
+function exportCSV() {
+  const h = getHistory();
+  if (!h.length) { alert("Aucun résultat à exporter."); return; }
+
+  const header = ["date_iso","nom","prenom","serie","score","total"].join(",");
+  const lines = h.map(e => {
+    const esc = v => `"${String(v).replaceAll('"','""')}"`;
+    return [e.ts, e.nom, e.prenom, e.serie, e.score, e.total].map(esc).join(",");
+  });
+
+  const csv = [header, ...lines].join("\n");
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "resultats_tajwid_qcm.csv";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+function resetExam() {
+  currentQuestions = [];
+  answers = {};
+  elExam.innerHTML = "";
+  elResult.innerHTML = "";
+}
+
+function clearHistory() {
+  if (!confirm("Supprimer tout l’historique local ?")) return;
+  localStorage.removeItem("tajwid_exam_history");
+  elHistory.innerHTML = `<p class="muted">Historique supprimé.</p>`;
+}
+
+document.getElementById("btnStart").addEventListener("click", startExam);
+document.getElementById("btnReset").addEventListener("click", resetExam);
+document.getElementById("btnHistory").addEventListener("click", renderHistory);
+document.getElementById("btnExport").addEventListener("click", exportCSV);
+document.getElementById("btnClearHistory").addEventListener("click", clearHistory);
 </script>
-
 </body>
 </html>
